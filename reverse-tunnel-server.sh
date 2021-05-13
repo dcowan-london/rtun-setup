@@ -4,6 +4,9 @@
 # Copyright (c) 2021 Dovi Cowan (Fully Networking UK) - dovi@fullynetworking.co.uk
 # MIT License
 
+# Run "# bash <(curl -s https://raw.githubusercontent.com/dcowan-london/public-scripts/main/reverse-tunnel-server.sh)"
+# on a new Debian 10 server with a public IP address to set up
+
 cd
 
 apt update
@@ -40,7 +43,7 @@ EOF
 
 ADD_AGENT=1
 
-while [[ $ADD_AGENT -eq 1 ]] do
+while [[ $ADD_AGENT -eq 1 ]]; do
 
     read -N 1 -p "Add client? [y/n] " CREATE && echo
     if [[ $CREATE == "y" ]] then

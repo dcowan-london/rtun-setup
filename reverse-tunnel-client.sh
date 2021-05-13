@@ -53,6 +53,7 @@ while [[ $ADD_FORWARD -eq 1 ]]; do
 
     read -N 1 -p "Add forward? [y/n] " CREATE && echo
     if [[ $CREATE == "y" ]]; then
+        echo
         echo "You will be asked below to enter the server port and the local port."
         echo "The server port is the port on the server connections will be made to"
         echo "and the local port is the port that connection will be forwarded to."

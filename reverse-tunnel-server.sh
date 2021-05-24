@@ -166,6 +166,8 @@ EOF
             echo "Started server"
         fi
     fi
+else
+    systemctl restart rtun-server
 fi
 
 echo "Done. Run \"./rtun-server\" or \"systemctl start rtun-server\" to start the server."

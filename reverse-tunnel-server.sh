@@ -72,36 +72,6 @@ control_address: $(echo $SERVER_IP):10000
 agents:
 EOF
 
-# Create systemd service
-read -N 1 -p "Create service? [y/n] " SERVICE
-
-if [[ $SERVICE == "y" ]]; then
-    tee /etc/systemd/system/rtun-server.service >/dev/null <<EOF
-[Unit]
-Description=RTUN
-
-[Service]
-User=root
-WorkingDirectory=/root/reverse-tunnel
-ExecStart=/root/reverse-tunnel/rtun-server
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    systemctl daemon-reload
-    systemctl enable rtun-server
-
-    read -N 1 -p "Start service now? [y/n]"
-    echo
-
-    if [[ ${REPLY} == "y" ]]; then
-        systemctl start rtun-server
-        echo "Started server"
-    fi
-fi
-
 fi
 
 cd

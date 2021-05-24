@@ -34,15 +34,21 @@ echo "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
 echo "SOFTWARE."
 echo
 
+if [ ! -d "reverse-tunnel/" ]; then
+
+# Get prerequisites
 apt update
 apt upgrade -y
 apt install git build-essential golang -y
 
+# Get reverse-tunnel
 git clone https://github.com/snsinfu/reverse-tunnel
 cd reverse-tunnel
 
+# Build reverse-tunnel
 make
 
+# Get server IP
 SERVER_IP=0
 
 IP_CORRECT=0
@@ -62,8 +68,10 @@ while [[ $IP_CORRECT -ne 1 ]]; do
     fi
 done;
 
+# Get client key
 read -p "Paste the Client Key genarated by the server: " KEY
 
+# Write client config
 tee rtun.yml >/dev/null <<EOF
 gateway_url: ws://$(echo $SERVER_IP):10000
 
@@ -72,6 +80,44 @@ auth_key: $(echo $KEY)
 forwards:
 EOF
 
+# Create systemd service
+read -N 1 -p "Create service? [y/n] " SERVICE
+
+if [[ $SERVICE == "y" ]]; then
+    # Write systemd service
+    tee /etc/systemd/system/rtun-client.service >/dev/null <<EOF
+[Unit]
+Description=RTUN Client
+
+[Service]
+User=root
+WorkingDirectory=/root/reverse-tunnel
+ExecStart=/root/reverse-tunnel/rtun
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # Enable systemd service
+    systemctl daemon-reload
+    systemctl enable rtun-client
+
+    read -N 1 -p "Start service now? [y/n]"
+    echo
+
+    if [[ ${REPLY} == "y" ]]; then
+        systemctl start rtun-client
+        echo "Started server"
+    fi
+fi
+
+fi
+
+cd
+cd reverse-tunnel/
+
+# Add ports to forward
 ADD_FORWARD=1
 
 while [[ $ADD_FORWARD -eq 1 ]]; do
@@ -88,46 +134,17 @@ while [[ $ADD_FORWARD -eq 1 ]]; do
         read -p "Enter client port (in format IP:port, eg 127.0.0.1:80): " CLIENT_PORT
         echo
 
+        # Write port to client config
         tee -a rtun.yml >/dev/null <<EOF
     - port: $(echo $SERVER_PORT)
       destination: $(echo $CLIENT_PORT)
-
 EOF
-        
+
     elif [[ $CREATE == "n" ]]; then
         ADD_FORWARD=0
     else
         echo "You must enter y or n!"
     fi
 done;
-
-read -N 1 -p "Create service? [y/n] " SERVICE
-
-if [[ $SERVICE == "y" ]]; then
-    tee /etc/systemd/system/rtun-client.service >/dev/null <<EOF
-[Unit]
-Description=RTUN Client
-
-[Service]
-User=root
-WorkingDirectory=/root/reverse-tunnel
-ExecStart=/root/reverse-tunnel/rtun
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    systemctl daemon-reload
-    systemctl enable rtun-client
-
-    read -N 1 -p "Start service now? [y/n]"
-    echo
-
-    if [[ ${REPLY} == "y" ]]; then
-        systemctl start rtun-client
-        echo "Started server"
-    fi
-fi
 
 echo "Done. Run \"./rtun-client\" to start the server."

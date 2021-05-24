@@ -136,7 +136,7 @@ EOF
     fi
 done;
 
-if [[ ! $(systemctl list-units --all -t service --full --no-legend "rtun-client.service" | cut -f1 -d' ') ]]; then
+if [[ ! $(systemctl list-units --all -t service --full --no-legend "rtun-server.service" | cut -f1 -d' ') ]]; then
     # Create systemd service
     read -N 1 -p "Create service? [y/n] " SERVICE
 

@@ -92,6 +92,7 @@ Description=RTUN Client
 [Service]
 User=root
 WorkingDirectory=/root/reverse-tunnel
+ExecStartPre=/bin/sleep 5
 ExecStart=/root/reverse-tunnel/rtun
 Restart=always
 
